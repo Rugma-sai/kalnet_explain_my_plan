@@ -140,13 +140,12 @@ app.post("/analyze", async (req, res) => {
     // 📤 Send response
     res.json(parsed);
 
-  } catch (error) {
-    console.error("API ERROR:", error.response?.data || error.message);
-
-    res.status(500).json({
-      error: error.response?.data || error.message,
-    });
-  }
+  }catch (error) {
+  console.error("FULL ERROR:", error.response?.data || error.message);
+  res.status(500).json({
+    error: error.response?.data || error.message
+  });
+}
 });
 
 // 🚀 Start server
