@@ -13,7 +13,7 @@ function App() {
     setLoading(true);
 
     try {
-      const res = await axios.post("http://127.0.0.1:5000/analyze", {
+      const res = await axios.post("https://explain-my-plan.onrender.com/analyze", {
         input,
       });
 
