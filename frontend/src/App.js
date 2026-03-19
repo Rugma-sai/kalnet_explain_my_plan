@@ -13,7 +13,7 @@ function App() {
     setLoading(true);
 
     try {
-      const res = await axios.post("https://explain-my-plan.onrender.com/analyze", {
+      const res = await axios.post("https://kalnet-explain-my-plan.onrender.com", {
         input,
       });
 
