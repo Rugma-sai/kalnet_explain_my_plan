@@ -4,120 +4,110 @@ import "./App.css";
 
 function App() {
   const [input, setInput] = useState("");
-  const [output, setOutput] = useState(null);
+  const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [previousScore, setPreviousScore] = useState(null);
 
   const handleAnalyze = async () => {
-    if (!input) return;
-
-    setLoading(true);
-
-    try {
-      const res = await axios.post("https://kalnet-explain-my-plan.onrender.com/analyze", {
-        input,
-      });
-
-      setOutput(res.data);
-    } catch (err) {
-      console.error("ERROR:", err.response?.data || err.message);
-      alert(JSON.stringify(err.response?.data || err.message));
+    if (!input.trim()) {
+      alert("Please enter a plan");
+      return;
     }
 
-    setLoading(false);
+    try {
+      setLoading(true);
+
+      // Store previous score before updating
+      if (data && data["Clarity Score"]) {
+        setPreviousScore(data["Clarity Score"]);
+      }
+
+      const res = await axios.post(
+        "https://kalnet-explain-my-plan.onrender.com/analyze",
+        { input }
+      );
+
+      setData(res.data);
+    } catch (err) {
+      console.error("ERROR:", err.response?.data || err.message);
+      alert("Something went wrong");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="app">
-      <div className="header">
-        <h1>Explain My Plan</h1>
-        <p>Transform vague ideas into structured, actionable plans</p>
-      </div>
+    <div className="container">
+      <h1>Explain My Plan</h1>
+      <p>Transform vague ideas into structured, actionable plans</p>
 
-      <div className="container">
-        <h3>📝 Your Idea or Plan</h3>
+      <textarea
+        placeholder="e.g. I want to start a YouTube channel and earn money quickly"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+      />
 
-        <textarea
-          placeholder="e.g., I want to start a YouTube channel and earn money quickly..."
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-        />
+      <button onClick={handleAnalyze}>
+        {loading ? "Analyzing..." : "Analyze Plan"}
+      </button>
 
-        <div className="buttons">
-          <button onClick={handleAnalyze}>
-            {loading ? "Analyzing..." : "Analyze Plan"}
-          </button>
-          <button onClick={() => setInput("")}>New Plan</button>
+      <button onClick={() => setData(null)}>New Plan</button>
+
+      {/* Iteration Hint */}
+      <p style={{ marginTop: "10px", fontSize: "14px" }}>
+        Modify your input and re-run analysis to observe improvements.
+      </p>
+
+      {data && (
+        <div className="result">
+          <h2>Clarity Score</h2>
+          <p>{data["Clarity Score"]} / 100</p>
+
+          {/* ✅ Iteration Feature */}
+          {previousScore !== null && (
+            <p style={{ color: "green" }}>
+              Previous Score: {previousScore} → Current Score:{" "}
+              {data["Clarity Score"]}
+            </p>
+          )}
+
+          <h3>🎯 Goal</h3>
+          <p>{data.Goal}</p>
+
+          <h3>⚙️ Method / Approach</h3>
+          <p>{data.Method}</p>
+
+          <h3>⏳ Timeline</h3>
+          <p>{data.Timeline}</p>
+
+          <h3>📋 Steps</h3>
+          <ul>
+            {data.Steps.map((step, i) => (
+              <li key={i}>{step}</li>
+            ))}
+          </ul>
+
+          <h3>✨ Simplified Version</h3>
+          <p>{data["Simplified Version"]}</p>
+
+          <h3>⚠️ Missing Elements</h3>
+          <ul>
+            <li>Goal clarity: {data["Missing Elements"]["Goal clarity"]}</li>
+            <li>
+              Execution steps: {data["Missing Elements"]["Execution steps"]}
+            </li>
+            <li>Resources: {data["Missing Elements"]["Resources"]}</li>
+            <li>Timeline: {data["Missing Elements"]["Timeline"]}</li>
+          </ul>
+
+          <h3>🚀 Actionable Steps</h3>
+          <ul>
+            {data["Actionable Steps"].map((step, i) => (
+              <li key={i}>{step}</li>
+            ))}
+          </ul>
         </div>
-
-        {output && (
-          <div className="results">
-
-            {/* SCORE */}
-            <div className="score">
-              <h2>Clarity Score</h2>
-              <p>{output["Clarity Score"]} / 100</p>
-            </div>
-
-            {/* GOAL + METHOD */}
-            <div className="grid">
-              <div className="card">
-                <h3>🎯 Goal</h3>
-                <p>{output.Goal}</p>
-              </div>
-
-              <div className="card">
-                <h3>⚙️ Method/Approach</h3>
-                <p>{output.Method}</p>
-              </div>
-            </div>
-
-            {/* TIMELINE */}
-            <div className="card timeline">
-              <h3>⏳ Timeline</h3>
-              <p>{output.Timeline}</p>
-            </div>
-
-            {/* STEPS */}
-            <div className="card">
-              <h3>📋 Steps</h3>
-              <ul>
-                {output.Steps.map((s, i) => (
-                  <li key={i}>{s}</li>
-                ))}
-              </ul>
-            </div>
-
-            {/* SIMPLIFIED */}
-            <div className="card simplified">
-              <h3>✨ Simplified Version</h3>
-              <p>{output["Simplified Version"]}</p>
-            </div>
-
-            {/* MISSING */}
-            <div className="card missing">
-              <h3>⚠️ Missing Elements</h3>
-              <ul>
-                {Object.entries(output["Missing Elements"]).map(([k, v]) => (
-                  <li key={k}>
-                    {v}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* ACTION STEPS */}
-            <div className="card action">
-              <h3>🚀 Actionable Next Steps</h3>
-              <ul>
-                {output["Actionable Steps"].map((s, i) => (
-                  <li key={i}>{s}</li>
-                ))}
-              </ul>
-            </div>
-
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
 }
