@@ -9,6 +9,7 @@ function App() {
 
   const [previousScore, setPreviousScore] = useState(null);
   const [previousInput, setPreviousInput] = useState("");
+  const [lastInput, setLastInput] = useState("");
 
   const handleAnalyze = async () => {
     if (!input.trim()) {
@@ -19,10 +20,10 @@ function App() {
     try {
       setLoading(true);
 
-      // Store previous data
+      // ✅ Store previous values BEFORE updating
       if (data) {
         setPreviousScore(data["Clarity Score"]);
-        setPreviousInput(input);
+        setPreviousInput(lastInput); // correct previous input
       }
 
       const res = await axios.post(
@@ -31,6 +32,10 @@ function App() {
       );
 
       setData(res.data);
+
+      // ✅ Save current input for next iteration
+      setLastInput(input);
+
     } catch (err) {
       console.error(err);
       alert("Error analyzing plan");
@@ -67,7 +72,7 @@ function App() {
               <h2>Clarity Score</h2>
               <p>{data["Clarity Score"]} / 100</p>
 
-              {/* ✅ ITERATION VISIBILITY */}
+              {/* ✅ ITERATION DISPLAY */}
               {previousScore !== null && (
                 <div className="iteration-box">
                   <p><strong>Previous Input:</strong> {previousInput}</p>
