@@ -17,7 +17,7 @@ function App() {
     try {
       setLoading(true);
 
-      // Store previous score before updating
+      // Store previous score
       if (data && data["Clarity Score"]) {
         setPreviousScore(data["Clarity Score"]);
       }
@@ -29,85 +29,112 @@ function App() {
 
       setData(res.data);
     } catch (err) {
-      console.error("ERROR:", err.response?.data || err.message);
-      alert("Something went wrong");
+      console.error(err);
+      alert("Error analyzing plan");
     } finally {
       setLoading(false);
     }
   };
 
+  const handleNewPlan = () => {
+    setInput("");
+    setData(null);
+    setPreviousScore(null);
+  };
+
   return (
-    <div className="container">
-      <h1>Explain My Plan</h1>
-      <p>Transform vague ideas into structured, actionable plans</p>
+    <div className="app">
+      <div className="header">
+        <h1>Explain My Plan</h1>
+        <p>Transform vague ideas into structured, actionable plans</p>
+      </div>
 
-      <textarea
-        placeholder="e.g. I want to start a YouTube channel and earn money quickly"
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-      />
+      <div className="card">
+        <h3>📝 Your Idea or Plan</h3>
 
-      <button onClick={handleAnalyze}>
-        {loading ? "Analyzing..." : "Analyze Plan"}
-      </button>
+        <textarea
+          placeholder="e.g., I want to start a YouTube channel and earn money quickly..."
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+        />
 
-      <button onClick={() => setData(null)}>New Plan</button>
+        <div className="buttons">
+          <button onClick={handleAnalyze}>
+            {loading ? "Analyzing..." : "Analyze Plan"}
+          </button>
 
-      {/* Iteration Hint */}
-      <p style={{ marginTop: "10px", fontSize: "14px" }}>
-        Modify your input and re-run analysis to observe improvements.
-      </p>
-
-      {data && (
-        <div className="result">
-          <h2>Clarity Score</h2>
-          <p>{data["Clarity Score"]} / 100</p>
-
-          {/* ✅ Iteration Feature */}
-          {previousScore !== null && (
-            <p style={{ color: "green" }}>
-              Previous Score: {previousScore} → Current Score:{" "}
-              {data["Clarity Score"]}
-            </p>
-          )}
-
-          <h3>🎯 Goal</h3>
-          <p>{data.Goal}</p>
-
-          <h3>⚙️ Method / Approach</h3>
-          <p>{data.Method}</p>
-
-          <h3>⏳ Timeline</h3>
-          <p>{data.Timeline}</p>
-
-          <h3>📋 Steps</h3>
-          <ul>
-            {data.Steps.map((step, i) => (
-              <li key={i}>{step}</li>
-            ))}
-          </ul>
-
-          <h3>✨ Simplified Version</h3>
-          <p>{data["Simplified Version"]}</p>
-
-          <h3>⚠️ Missing Elements</h3>
-          <ul>
-            <li>Goal clarity: {data["Missing Elements"]["Goal clarity"]}</li>
-            <li>
-              Execution steps: {data["Missing Elements"]["Execution steps"]}
-            </li>
-            <li>Resources: {data["Missing Elements"]["Resources"]}</li>
-            <li>Timeline: {data["Missing Elements"]["Timeline"]}</li>
-          </ul>
-
-          <h3>🚀 Actionable Steps</h3>
-          <ul>
-            {data["Actionable Steps"].map((step, i) => (
-              <li key={i}>{step}</li>
-            ))}
-          </ul>
+          <button className="secondary" onClick={handleNewPlan}>
+            New Plan
+          </button>
         </div>
-      )}
+
+        {data && (
+          <>
+            <div className="score">
+              <h2>Clarity Score</h2>
+              <p>{data["Clarity Score"]} / 100</p>
+
+              {/* ✅ REAL ITERATION */}
+              {previousScore !== null && (
+                <p className="improve">
+                  Previous: {previousScore} → Now:{" "}
+                  {data["Clarity Score"]}
+                </p>
+              )}
+            </div>
+
+            <div className="grid">
+              <div className="box">
+                <h3>🎯 Goal</h3>
+                <p>{data.Goal}</p>
+              </div>
+
+              <div className="box">
+                <h3>⚙️ Method</h3>
+                <p>{data.Method}</p>
+              </div>
+
+              <div className="box">
+                <h3>⏳ Timeline</h3>
+                <p>{data.Timeline}</p>
+              </div>
+            </div>
+
+            <div className="box">
+              <h3>📋 Steps</h3>
+              <ul>
+                {data.Steps.map((s, i) => (
+                  <li key={i}>{s}</li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="box">
+              <h3>✨ Simplified</h3>
+              <p>{data["Simplified Version"]}</p>
+            </div>
+
+            <div className="box red">
+              <h3>⚠️ Missing Elements</h3>
+              <ul>
+                <li>{data["Missing Elements"]["Goal clarity"]}</li>
+                <li>{data["Missing Elements"]["Execution steps"]}</li>
+                <li>{data["Missing Elements"]["Resources"]}</li>
+                <li>{data["Missing Elements"]["Timeline"]}</li>
+              </ul>
+            </div>
+
+            <div className="box yellow">
+              <h3>🚀 Actionable Steps</h3>
+              <ul>
+                {data["Actionable Steps"].map((s, i) => (
+                  <li key={i}>{s}</li>
+                ))}
+              </ul>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }

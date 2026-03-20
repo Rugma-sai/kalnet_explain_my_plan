@@ -1,107 +1,85 @@
 body {
   margin: 0;
-  font-family: 'Segoe UI', sans-serif;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #5f6dfc, #8b5cf6);
 }
 
-/* HEADER */
-.header {
-  background: linear-gradient(to right, #5f6bdc, #7b4fd3);
-  color: white;
+.app {
   text-align: center;
-  padding: 40px 20px;
+  padding: 20px;
+  color: white;
 }
 
 .header h1 {
   margin: 0;
-  font-size: 36px;
 }
 
-/* CONTAINER */
-.container {
-  max-width: 900px;
-  margin: auto;
+.card {
+  background: #f9f9f9;
+  color: black;
   padding: 20px;
+  border-radius: 15px;
+  max-width: 800px;
+  margin: 20px auto;
 }
 
-/* INPUT */
 textarea {
   width: 100%;
   height: 120px;
-  padding: 12px;
+  padding: 10px;
   border-radius: 10px;
   border: 1px solid #ccc;
-  margin: 10px 0;
 }
 
-/* BUTTONS */
 .buttons {
-  display: flex;
-  gap: 10px;
+  margin-top: 10px;
 }
 
 button {
-  padding: 12px 20px;
-  border-radius: 8px;
+  padding: 10px 20px;
+  margin: 5px;
   border: none;
+  border-radius: 10px;
+  background: #5f6dfc;
+  color: white;
   cursor: pointer;
 }
 
-button:first-child {
-  background: #5f6bdc;
+button.secondary {
+  background: #ccc;
+  color: black;
+}
+
+.score {
+  background: linear-gradient(135deg, #5f6dfc, #8b5cf6);
   color: white;
-}
-
-button:last-child {
-  background: #ddd;
-}
-
-/* RESULTS */
-.results {
+  padding: 15px;
+  border-radius: 10px;
   margin-top: 20px;
 }
 
-/* GRID */
+.improve {
+  margin-top: 5px;
+  font-weight: bold;
+}
+
 .grid {
   display: flex;
   gap: 10px;
+  margin-top: 15px;
 }
 
-.grid .card {
-  flex: 1;
-}
-
-/* CARD */
-.card {
-  background: #f8f8f8;
+.box {
+  background: #eee;
   padding: 15px;
-  margin-bottom: 15px;
   border-radius: 10px;
+  margin-top: 10px;
 }
 
-/* SCORE */
-.score {
-  background: linear-gradient(to right, #6a5acd, #7b4fd3);
-  color: white;
-  text-align: center;
-  padding: 20px;
-  border-radius: 12px;
-  font-size: 24px;
+.box.red {
+  background: #ffe5e5;
 }
 
-/* SPECIAL SECTIONS */
-.timeline {
-  background: #fff3e0;
-}
-
-.simplified {
-  background: #e8f5e9;
-}
-
-.missing {
-  background: #ffe6e6;
-  color: red;
-}
-
-.action {
-  background: #fff8e1;
+.box.yellow {
+  background: #fff4cc;
 }
