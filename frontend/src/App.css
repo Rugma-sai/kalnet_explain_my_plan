@@ -84,8 +84,8 @@ button.secondary {
   background: #fff4cc;
 }
 .iteration-box {
-  margin-top: 10px;
-  background: #eef;
+  background: #eee;
   padding: 10px;
   border-radius: 8px;
+  color: black !important;
 }
