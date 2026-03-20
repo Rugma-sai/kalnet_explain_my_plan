@@ -6,7 +6,9 @@ function App() {
   const [input, setInput] = useState("");
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
+
   const [previousScore, setPreviousScore] = useState(null);
+  const [previousInput, setPreviousInput] = useState("");
 
   const handleAnalyze = async () => {
     if (!input.trim()) {
@@ -17,9 +19,10 @@ function App() {
     try {
       setLoading(true);
 
-      // Store previous score
-      if (data && data["Clarity Score"]) {
+      // Store previous data
+      if (data) {
         setPreviousScore(data["Clarity Score"]);
+        setPreviousInput(input);
       }
 
       const res = await axios.post(
@@ -36,12 +39,6 @@ function App() {
     }
   };
 
-  const handleNewPlan = () => {
-    setInput("");
-    setData(null);
-    setPreviousScore(null);
-  };
-
   return (
     <div className="app">
       <div className="header">
@@ -53,7 +50,7 @@ function App() {
         <h3>📝 Your Idea or Plan</h3>
 
         <textarea
-          placeholder="e.g., I want to start a YouTube channel and earn money quickly..."
+          placeholder="e.g., I want to start a YouTube channel..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
         />
@@ -61,10 +58,6 @@ function App() {
         <div className="buttons">
           <button onClick={handleAnalyze}>
             {loading ? "Analyzing..." : "Analyze Plan"}
-          </button>
-
-          <button className="secondary" onClick={handleNewPlan}>
-            New Plan
           </button>
         </div>
 
@@ -74,12 +67,16 @@ function App() {
               <h2>Clarity Score</h2>
               <p>{data["Clarity Score"]} / 100</p>
 
-              {/* ✅ REAL ITERATION */}
+              {/* ✅ ITERATION VISIBILITY */}
               {previousScore !== null && (
-                <p className="improve">
-                  Previous: {previousScore} → Now:{" "}
-                  {data["Clarity Score"]}
-                </p>
+                <div className="iteration-box">
+                  <p><strong>Previous Input:</strong> {previousInput}</p>
+                  <p><strong>Current Input:</strong> {input}</p>
+                  <p>
+                    <strong>Score Improvement:</strong> {previousScore} →{" "}
+                    {data["Clarity Score"]}
+                  </p>
+                </div>
               )}
             </div>
 

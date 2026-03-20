@@ -83,3 +83,9 @@ button.secondary {
 .box.yellow {
   background: #fff4cc;
 }
+.iteration-box {
+  margin-top: 10px;
+  background: #eef;
+  padding: 10px;
+  border-radius: 8px;
+}
