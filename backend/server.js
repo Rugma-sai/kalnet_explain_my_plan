@@ -2,31 +2,41 @@ const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
 require("dotenv").config();
-
 const { createClient } = require("@supabase/supabase-js");
 
 const app = express();
+
+// ✅ CORS setup
 app.use(cors({
   origin: "*",
   methods: ["GET", "POST", "OPTIONS"],
   allowedHeaders: ["Content-Type"]
 }));
+
 app.use(express.json());
 
-// 🔐 Debug
-console.log("OPENROUTER KEY:", process.env.OPENROUTER_API_KEY ? "Loaded ✅" : "Missing ❌");
+// 🔐 Debug API key
+console.log(
+  "OPENROUTER KEY:",
+  process.env.OPENROUTER_API_KEY ? "Loaded ✅" : "Missing ❌"
+);
 
-// Supabase setup
+// ✅ Supabase setup
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_KEY
 );
 
-// 🔥 FINAL PROMPT
+// ✅ Health check route (important for Render)
+app.get("/", (req, res) => {
+  res.send("Backend is running 🚀");
+});
+
+// 🔥 PROMPT
 const PROMPT = `
 You are an AI planning assistant that converts vague user ideas into clear, structured, and actionable plans.
 
-Your task is to analyze the user input and return ONLY valid JSON in the exact format below.
+Return ONLY valid JSON in this format:
 
 {
   "Goal": "",
@@ -44,58 +54,25 @@ Your task is to analyze the user input and return ONLY valid JSON in the exact f
   "Clarity Score": 0
 }
 
-INSTRUCTIONS:
-
-1. Goal:
-- Extract a clear and specific goal from the input.
-
-2. Method:
-- Describe the overall approach to achieve the goal.
-
-3. Steps:
-- Provide at least 4–6 clear, logical, and ordered steps.
-- If not present, intelligently generate them.
-
-4. Timeline:
-- If not mentioned, write "Missing".
-
-5. Missing Elements:
-- Goal clarity → "Clear" or explain what is vague
-- Execution steps → "Present" or "Missing"
-- Resources → "Mentioned" or "Not mentioned"
-- Timeline → "Present" or "Missing"
-
-6. Simplified Version:
-- Rewrite the idea in one clear sentence.
-
-7. Actionable Steps:
-- Provide at least 5 practical next steps that can be executed immediately.
-
-8. Clarity Score (0–100):
-- Goal clarity (25)
-- Steps present (25)
-- Timeline present (25)
-- Overall completeness (25)
-
-SCORING RULES:
-- Deduct points for missing or vague elements
-- Do NOT return 0 unless input is completely unclear
-
-IMPORTANT RULES:
+Rules:
 - Output ONLY JSON
-- No explanations, no markdown, no extra text
-- Ensure valid JSON (no trailing commas)
+- No markdown, no explanation
+- Ensure valid JSON
 `;
-// 🚀 API Route
+
+// 🚀 API ROUTE
 app.post("/analyze", async (req, res) => {
   const { input } = req.body;
+
+  console.log("📥 Input:", input);
 
   if (!input) {
     return res.status(400).json({ error: "Input is required" });
   }
 
   try {
-    // 🔥 OpenRouter API call
+    console.log("🚀 Calling OpenRouter...");
+
     const response = await axios.post(
       "https://openrouter.ai/api/v1/chat/completions",
       {
@@ -109,26 +86,31 @@ app.post("/analyze", async (req, res) => {
       },
       {
         headers: {
-          "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
+          Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
           "Content-Type": "application/json",
         },
+        timeout: 20000, // ✅ prevent hanging
       }
     );
 
+    console.log("✅ AI response received");
+
     let text = response.data.choices[0].message.content;
 
-    // 🧠 Clean JSON
+    // 🧠 Clean response
     text = text.replace(/```json/g, "").replace(/```/g, "").trim();
 
     let parsed;
     try {
       parsed = JSON.parse(text);
     } catch (err) {
-      console.error("JSON Parse Error:", text);
+      console.error("❌ JSON Parse Error:", text);
       return res.status(500).json({ error: "Invalid JSON from AI" });
     }
 
-    // 💾 Store in Supabase
+    console.log("💾 Saving to Supabase...");
+
+    // 💾 Save data (optional but useful)
     const { error: dbError } = await supabase.from("plans").insert([
       {
         user_input: input,
@@ -138,18 +120,23 @@ app.post("/analyze", async (req, res) => {
     ]);
 
     if (dbError) {
-      console.error("Supabase Error:", dbError.message);
+      console.error("❌ Supabase Error:", dbError.message);
     }
 
-    // 📤 Send response
+    console.log("📤 Sending response");
+
     res.json(parsed);
 
-  }catch (error) {
-  console.error("FULL ERROR:", error.response?.data || error.message);
-  res.status(500).json({
-    error: error.response?.data || error.message
-  });
-}
+  } catch (error) {
+    console.error(
+      "🔥 FULL ERROR:",
+      error.response?.data || error.message
+    );
+
+    res.status(500).json({
+      error: error.response?.data || error.message,
+    });
+  }
 });
 
 // 🚀 Start server
